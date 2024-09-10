@@ -14,6 +14,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
+        backgroundColor: Colors.teal,
       ),
       drawer: Drawer(
         child: Column(
@@ -23,7 +24,10 @@ class _HomePageState extends State<HomePage> {
               accountEmail: const Text('tessele@exemplo.com'),
               currentAccountPicture: CircleAvatar(
                 backgroundImage:
-                    NetworkImage('https://via.placeholder.com/150'),
+                    AssetImage('assets/VINICIUS TESSELE3.png'),
+              ),
+              decoration: BoxDecoration(
+                color: Colors.teal,
               ),
             ),
             ListTile(
@@ -36,10 +40,62 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
+            Divider(),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Configurações'),
+              onTap: () {
+                // Ação para ir para a tela de configurações
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.info),
+              title: const Text('Sobre'),
+              onTap: () {
+                // Ação para ir para a tela de informações
+              },
+            ),
           ],
         ),
       ),
-      body: Center(child: const Text('Tela Inicial')),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade100, Colors.teal.shade50],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.home,
+                size: 100,
+                color: Colors.teal,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Bem-vindo ao App de QrCode Pix!',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal.shade800,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Selecione uma opção no menu para começar.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.teal.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

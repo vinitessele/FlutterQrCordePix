@@ -1,69 +1,77 @@
-String generatePixCode({
-  required String pixKey,      // Chave Pix (e-mail, CPF, CNPJ, etc.)
-  String? merchantName,        // Nome do recebedor
-  String? merchantCity,        // Cidade do recebedor
-  double? amount,              // Valor opcional
-  String? transactionId,       // Identificador da transação (opcional)
-}) {
-  // Formatação padrão do código Pix de acordo com o padrão EMV
+String generatePixCode(double? amount) {
+  var chavePix = "+5544999168055"; // Chave Pix (e-mail, CPF, CNPJ, etc.)
+  var nomeRecebedor = "Vinicius Tessele"; // Nome do recebedor
+  var cidadeRecebedor = "Toledo"; // Cidade do recebedor
+  var transacaoId = "070503"; // Identificador da transação (opcional)
+
   String pixCode = '';
 
   // Identificador do Payload Format Indicator
   pixCode += '000201';
 
-  // Merchant Account Information
-  String merchantAccountInfo = '0014BR.GOV.BCB.PIX01${pixKey.length}$pixKey';
-  pixCode += '26${merchantAccountInfo.length}$merchantAccountInfo';
+  String informacaoConta =
+      '0014BR.GOV.BCB.PIX01${chavePix.length.toString().padLeft(2, '0')}$chavePix';
+  pixCode +=
+      '26${informacaoConta.length.toString().padLeft(2, '0')}$informacaoConta';
 
-  // Merchant Category Code
+
   pixCode += '52040000';
 
-  // Transaction Currency (BRL)
+  // Transaction Currency (986 = BRL)
   pixCode += '5303986';
 
-  // Valor
+  // Valor (amount)
   if (amount != null && amount > 0) {
-    String formattedAmount = amount.toStringAsFixed(2).replaceAll('.', '');
-    pixCode += '54${formattedAmount.length}$formattedAmount';
+    String formattedAmount =
+        amount.toStringAsFixed(2); // Formata com duas casas decimais
+    pixCode +=
+        '54${formattedAmount.length.toString().padLeft(2, '0')}$formattedAmount';
+  }
+  pixCode += '5802BR';
+  if (nomeRecebedor != null && nomeRecebedor.isNotEmpty) {
+    pixCode +=
+        '59${nomeRecebedor.length.toString().padLeft(2, '0')}$nomeRecebedor';
+  } else {
+    pixCode += '5901 ';
   }
 
-  // Nome do recebedor
-  if (merchantName != null) {
-    pixCode += '5802BR';  // Código do país
-    pixCode += '59${merchantName.length}$merchantName';
-  }
-
-  // Cidade do recebedor
-  if (merchantCity != null) {
-    pixCode += '60${merchantCity.length}$merchantCity';
+  if (cidadeRecebedor != null && cidadeRecebedor.isNotEmpty) {
+    pixCode +=
+        '60${cidadeRecebedor.length.toString().padLeft(2, '0')}$cidadeRecebedor';
+  } else {
+    pixCode += '6003   '; // Três espaços para cidade mínima
   }
 
   // Transaction ID
-  if (transactionId != null) {
-    pixCode += '62${transactionId.length}$transactionId';
+  if (transacaoId != null && transacaoId.isNotEmpty) {
+    pixCode += '62$transacaoId***';
+  } else {
+    pixCode += '6204***'; // Valor padrão para ID de transação
   }
 
   // Adicionar CRC (Checksum)
   pixCode += '6304';
   String crc16 = calculateCRC16(pixCode);
+  print(crc16);
   pixCode += crc16;
 
   return pixCode;
 }
 
-// Função para calcular o CRC16 do código Pix
 String calculateCRC16(String str) {
-  int crc = 0xFFFF;
+  int crc = 0xFFFF; // Valor inicial do CRC
   for (int i = 0; i < str.length; i++) {
-    crc ^= str.codeUnitAt(i) << 8;
+    crc ^= str.codeUnitAt(i) << 8; // XOR com o byte atual
     for (int j = 0; j < 8; j++) {
       if ((crc & 0x8000) != 0) {
-        crc = (crc << 1) ^ 0x1021;
+        crc = (crc << 1) ^ 0x1021; // Polinômio CRC16
       } else {
         crc <<= 1;
       }
     }
   }
+  // Ajustar o CRC final para garantir que tenha 4 caracteres
+  crc &= 0xFFFF; // Limitar a 16 bits
   return crc.toRadixString(16).toUpperCase().padLeft(4, '0');
 }
 
